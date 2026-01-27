@@ -22,6 +22,14 @@ auto async_sizes<SIZE_TYPE>::get() const -> const_reference {
 }
 
 template <typename SIZE_TYPE>
+auto async_sizes<SIZE_TYPE>::await_get() const -> const_reference {
+
+    // Suspend until the event is complete before accessing the value
+    m_event->await();
+    return m_sizes;
+}
+
+template <typename SIZE_TYPE>
 void async_sizes<SIZE_TYPE>::wait() {
 
     m_event->wait();

@@ -48,6 +48,12 @@ public:
     ///
     const_reference get() const;
 
+    /// Access the async/future value suspending until completion
+    ///
+    /// @return Reference to the value
+    ///
+    const_reference await_get() const;
+
     /// @name Function(s) implemented from @c vecmem::abstract_event
     /// @{
 
