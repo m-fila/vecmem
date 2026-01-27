@@ -19,6 +19,9 @@
 // CUDA include(s).
 #include <cuda_runtime_api.h>
 
+// TBB include(s).
+#include <tbb/task.h>
+
 // System include(s).
 #include <cassert>
 
@@ -66,6 +69,25 @@ struct stream_owner {
     cudaStream_t m_stream{nullptr};
 
 };  // struct stream_owner
+
+/// Callback to resume a suspended TBB task
+void resumption_callback(void* tag) {
+    tbb::task::resume(*static_cast<tbb::task::suspend_point*>(tag));
+}
+
+/// Suspend TBB task until all work in the given CUDA stream is complete, then
+/// resume it
+void await(cudaStream_t stream) {
+    tbb::task::suspend_point
+        suspend_point;  // suspension point address must remain valid when
+                        // resumption callback is called
+    tbb::task::suspend([stream, &suspend_point](auto tag) {
+        suspend_point = tag;
+        VECMEM_CUDA_ERROR_CHECK(
+            cudaLaunchHostFunc(stream, resumption_callback, &suspend_point));
+    });
+    VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
+}
 
 }  // namespace details
 
@@ -131,6 +153,12 @@ void stream_wrapper::synchronize() {
 
     assert(m_impl->m_stream != nullptr);
     VECMEM_CUDA_ERROR_CHECK(cudaStreamSynchronize(m_impl->m_stream));
+}
+
+void stream_wrapper::await() {
+
+    assert(m_impl->m_stream != nullptr);
+    details::await(m_impl->m_stream);
 }
 
 std::string stream_wrapper::device_name() const {

@@ -28,7 +28,8 @@ namespace {
 struct cuda_event : public vecmem::abstract_event {
 
     /// Constructor with the created event.
-    explicit cuda_event(cudaEvent_t event) : m_event(event) {
+    explicit cuda_event(cudaEvent_t event, vecmem::cuda::stream_wrapper stream)
+        : m_event(event), m_stream(stream) {
         assert(m_event != nullptr);
     }
     /// Copy constructor
@@ -71,6 +72,16 @@ struct cuda_event : public vecmem::abstract_event {
         cuda_event::ignore();
     }
 
+    void await() override {
+        if (m_event == nullptr) {
+            return;
+        }
+        // this should be preceded with cudaStreamWaitEvent unless the event is
+        // recorded on the same stream (which is the case for async_copy)
+        m_stream.await();
+        cuda_event::ignore();
+    }
+
     /// Ignore the underlying CUDA event
     void ignore() override {
         if (m_event == nullptr) {
@@ -82,6 +93,7 @@ struct cuda_event : public vecmem::abstract_event {
 
     /// The CUDA event wrapped by this struct
     cudaEvent_t m_event;
+    vecmem::cuda::stream_wrapper m_stream;
 
 };  // struct cuda_event
 
@@ -162,7 +174,7 @@ async_copy::event_type async_copy::create_event() const {
 
     // Create a smart pointer around it to make memory management a little
     // safer.
-    auto event = std::make_unique<::cuda_event>(cudaEvent);
+    auto event = std::make_unique<::cuda_event>(cudaEvent, m_stream);
 
     // Record it into the copy object's CUDA stream.
     VECMEM_CUDA_ERROR_CHECK(

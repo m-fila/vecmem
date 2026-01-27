@@ -12,6 +12,7 @@ include( vecmem-compiler-options-cpp )
 
 # External dependency/dependencies.
 find_package( CUDAToolkit REQUIRED )
+find_package( TBB REQUIRED ) # grrrr
 
 # Set up the build of the VecMem CUDA library.
 vecmem_add_library( vecmem_cuda cuda
@@ -39,7 +40,7 @@ vecmem_add_library( vecmem_cuda cuda
    "src/utils/stream_wrapper.cpp" )
 target_link_libraries( vecmem_cuda
    PUBLIC vecmem::core
-   PRIVATE CUDA::cudart )
+   PRIVATE CUDA::cudart TBB::tbb )
 
 # Hide the library's symbols by default.
 set_target_properties( vecmem_cuda PROPERTIES

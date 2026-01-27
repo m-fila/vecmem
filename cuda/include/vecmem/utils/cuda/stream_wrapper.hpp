@@ -63,6 +63,10 @@ public:
     VECMEM_CUDA_EXPORT
     void synchronize();
 
+    /// Suspend execution until all queued tasks in the stream are complete
+    VECMEM_CUDA_EXPORT
+    void await();
+
     /// Get the name of the device that the stream operates on
     VECMEM_CUDA_EXPORT
     std::string device_name() const;

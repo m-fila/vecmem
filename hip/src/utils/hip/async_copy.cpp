@@ -71,6 +71,8 @@ struct hip_event : public vecmem::abstract_event {
         hip_event::ignore();
     }
 
+    void await() override { wait(); }
+
     /// Ignore the underlying HIP event
     void ignore() override {
         if (m_event == nullptr) {

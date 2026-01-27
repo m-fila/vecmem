@@ -55,6 +55,9 @@ public:
     /// complete
     void wait() override;
 
+    /// Suspend execution until the event is complete
+    void await() override;
+
     /// Function telling the object not to wait for the underlying event
     void ignore() override;
 

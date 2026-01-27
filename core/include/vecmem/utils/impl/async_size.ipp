@@ -28,6 +28,12 @@ void async_size<SIZE_TYPE>::wait() {
 }
 
 template <typename SIZE_TYPE>
+void async_size<SIZE_TYPE>::await() {
+
+    m_event->wait();
+}
+
+template <typename SIZE_TYPE>
 void async_size<SIZE_TYPE>::ignore() {
 
     m_event->ignore();
