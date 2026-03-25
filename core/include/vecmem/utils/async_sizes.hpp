@@ -62,6 +62,9 @@ public:
     /// complete
     void wait() override;
 
+    /// Function checking whether the event is complete without blocking
+    bool is_ready() override;
+
     /// Function telling the object not to wait for the underlying event
     void ignore() override;
 
