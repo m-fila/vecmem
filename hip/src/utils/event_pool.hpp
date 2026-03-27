@@ -30,8 +30,17 @@ namespace details {
 class event_pool {
 
 public:
+    /// Select how the host thread waits for a HIP event.
+    enum class wait_mode {
+        /// Waiting spins on the CPU (HIP default).
+        spinning,
+        /// Waiting uses blocking synchronization to reduce CPU usage.
+        blocking
+    };
+
     /// Constructor with the number of events to initially allocate
-    explicit event_pool(std::size_t size = 8u);
+    explicit event_pool(std::size_t size = 8u,
+                        wait_mode wait_mode = wait_mode::spinning);
     /// Destructor
     ~event_pool();
 
@@ -41,6 +50,8 @@ public:
     void free(hipEvent_t event);
 
 private:
+    /// HIP flags used when creating new events
+    unsigned int m_flags = 0u;
     /// The pool of events
     std::vector<hipEvent_t> m_pool;
     /// The number of currently used events

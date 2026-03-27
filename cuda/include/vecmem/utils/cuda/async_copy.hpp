@@ -17,6 +17,14 @@
 
 namespace vecmem::cuda {
 
+/// Select how the host thread waits for the events used by async operations.
+enum class event_wait_mode {
+    /// Waiting spins on the CPU.
+    spinning,
+    /// Waiting uses blocking synchronization to reduce CPU usage.
+    blocking
+};
+
 /// Specialisation of @c vecmem::copy for CUDA
 ///
 /// This specialisation of @c vecmem::copy, unlike @c vecmem::cuda::copy,
@@ -35,7 +43,8 @@ class async_copy : public vecmem::copy {
 public:
     /// Constructor with the stream to operate on
     VECMEM_CUDA_EXPORT
-    explicit async_copy(const stream_wrapper& stream);
+    explicit async_copy(const stream_wrapper& stream,
+                        event_wait_mode wait_mode = event_wait_mode::spinning);
     /// Move constructor
     VECMEM_CUDA_EXPORT
     async_copy(async_copy&&) noexcept;

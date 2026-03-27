@@ -33,26 +33,19 @@
 #include <cassert>
 #include <stdexcept>
 
-namespace {
-hipEvent_t create_event() {
-    hipEvent_t event;
-    // Disable collecting timing information since the event is used only for
-    // synchronization.
-    VECMEM_HIP_ERROR_CHECK(
-        hipEventCreateWithFlags(&event, hipEventDisableTiming));
-    return event;
-}
-}  // namespace
-
 namespace vecmem {
 namespace hip {
 namespace details {
 
-event_pool::event_pool(std::size_t size) {
+event_pool::event_pool(std::size_t size, wait_mode mode)
+    : m_flags(hipEventDisableTiming |
+              (mode == wait_mode::blocking ? hipEventBlockingSync
+                                           : hipEventDefault)),
+      m_pool(size) {
+
     // Create the (initial) events in the pool.
-    m_pool.reserve(size);
-    for (std::size_t i = 0; i < size; ++i) {
-        m_pool.push_back(::create_event());
+    for (hipEvent_t& e : m_pool) {
+        VECMEM_HIP_ERROR_CHECK(hipEventCreateWithFlags(&e, m_flags));
     }
 }
 
@@ -71,7 +64,9 @@ hipEvent_t event_pool::create() {
 
     // Create a new event if we don't have any available in the pool.
     if (m_pool.size() <= m_used_events) {
-        m_pool.push_back(::create_event());
+        hipEvent_t e;
+        VECMEM_HIP_ERROR_CHECK(hipEventCreateWithFlags(&e, m_flags));
+        m_pool.push_back(e);
     }
 
     // Return an (unused) event from the pool.
