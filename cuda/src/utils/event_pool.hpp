@@ -30,8 +30,17 @@ namespace details {
 class event_pool {
 
 public:
+    /// Select how the host thread waits for a CUDA event.
+    enum class wait_mode {
+        /// Waiting spins on the CPU (CUDA default).
+        spinning,
+        /// Waiting uses blocking synchronization to reduce CPU usage.
+        blocking
+    };
+
     /// Constructor with the number of events to initially allocate
-    explicit event_pool(std::size_t size = 8u);
+    explicit event_pool(std::size_t size = 8u,
+                        wait_mode wait_mode = wait_mode::spinning);
     /// Destructor
     ~event_pool();
 
@@ -41,6 +50,8 @@ public:
     void free(cudaEvent_t event);
 
 private:
+    /// CUDA flags used when creating new events
+    unsigned int m_flags = 0u;
     /// The pool of events
     std::vector<cudaEvent_t> m_pool;
     /// The number of currently used events
