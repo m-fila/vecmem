@@ -45,7 +45,7 @@ jobs:
     # The build/test steps to execute.
     steps:
     # Use a standard checkout of the code.
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     # Run the CMake configuration.
     - name: Configure
       run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD.TYPE }}
@@ -179,7 +179,7 @@ jobs:
     # The build/test steps to execute.
     steps:
     # Use a standard checkout of the code.
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     # Run the CMake configuration.
     - name: Configure
       run: |
