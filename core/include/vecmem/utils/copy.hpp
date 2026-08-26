@@ -342,6 +342,29 @@ protected:
     VECMEM_NODISCARD virtual event_type create_event() const;
 
 private:
+    /// Implementation for the 1D vector setup functions
+    template <typename TYPE>
+    bool setup_impl(data::vector_view<TYPE> data) const;
+    /// Implementation for the jagged vector setup functions
+    template <typename TYPE>
+    bool setup_impl(data::jagged_vector_view<TYPE> data) const;
+    /// Implementation for the SoA container setup functions
+    template <typename SCHEMA>
+    bool setup_impl(edm::view<SCHEMA> data) const;
+    /// Implementation for the 1D vector memset functions
+    template <typename TYPE>
+    bool memset_impl(data::vector_view<TYPE> data, int value) const;
+    /// Implementation for the jagged vector memset functions
+    template <typename TYPE>
+    bool memset_impl(data::jagged_vector_view<TYPE> data, int value) const;
+    /// Implementation for the SoA container memset functions
+    template <typename... VARTYPES>
+    bool memset_impl(edm::view<edm::schema<VARTYPES...>> data, int value) const;
+    /// Implementation for setting jagged vector sizes
+    template <typename TYPE>
+    bool set_sizes_impl(
+        const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
+        data::jagged_vector_view<TYPE> data) const;
     /// Implementation for the 1D vector copy operator
     template <typename TYPE>
     bool copy_view_impl(const data::vector_view<std::add_const_t<TYPE>>& from,
