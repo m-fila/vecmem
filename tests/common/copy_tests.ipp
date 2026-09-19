@@ -665,3 +665,22 @@ TEST_P(copy_tests, event_query) {
     EXPECT_EQ(expected_size, size.unsafe_get());
     EXPECT_EQ(expected_size, size.get());
 }
+
+/// Test that make_event returns a usable event
+TEST_P(copy_tests, make_event) {
+
+    // Create a small device buffer and set it up but skip event.
+    const auto expected_size = 16;
+    auto device_buffer =
+        vecmem::data::vector_buffer<int>(expected_size, main_mr());
+    main_copy().setup(device_buffer)->ignore();
+    // Get size...
+    auto size = main_copy().get_size(device_buffer, host_mr());
+    auto event = main_copy().make_event();
+    // ...but synchronize with an event created later on demand.
+    EXPECT_NE(event, nullptr);
+    EXPECT_NO_THROW(event->wait());
+    // At this point the size should be ready
+    EXPECT_TRUE(size.is_ready());
+    EXPECT_EQ(expected_size, size.unsafe_get());
+}

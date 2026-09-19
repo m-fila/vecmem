@@ -72,6 +72,9 @@ public:
     /// Event type used by the copy class
     using event_type = std::unique_ptr<abstract_event>;
 
+    /// Create an event for synchronizing an external operation
+    VECMEM_NODISCARD inline event_type make_event() const;
+
     /// @name 1-dimensional vector data handling functions
     /// @{
 

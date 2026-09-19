@@ -25,6 +25,10 @@
 
 namespace vecmem {
 
+copy::event_type copy::make_event() const {
+    return create_event();
+}
+
 template <typename TYPE>
 copy::event_type copy::setup(data::vector_view<TYPE> data) const {
 
